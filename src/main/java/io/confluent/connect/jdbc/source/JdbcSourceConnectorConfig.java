@@ -103,6 +103,17 @@ public class JdbcSourceConnectorConfig extends AbstractConfig {
   public static final String TIMESTAMP_COLUMN_NAME_DEFAULT = "";
   private static final String TIMESTAMP_COLUMN_NAME_DISPLAY = "Timestamp Column Name";
 
+  public static final String PARTITION_KEY_COLUMN_NAME_CONFIG = "partitionKey.column.name";
+  private static final String PARTITION_KEY_COLUMN_NAME_DOC = "The name of the timestamp column to use to detect new or modified rows. This column may "
+          + "not be nullable.";
+  public static final String PARTITION_KEY_COLUMN_NAME_DEFAULT = "";
+  private static final String PARTITION_KEY_COLUMN_NAME_DISPLAY = "Partition Key Column Name";
+
+  public static final String OFFSET_RESET_CONFIG = "offset.reset";
+  private static final String OFFSET_RESET_DOC = "Offset reset when task runs the first time";
+  public static final String OFFSET_RESET_DEFAULT = "earliest";
+  private static final String OFFSET_RESET_DISPLAY = "Offset reset";
+
   public static final String TABLE_POLL_INTERVAL_MS_CONFIG = "table.poll.interval.ms";
   private static final String TABLE_POLL_INTERVAL_MS_DOC =
       "Frequency in ms to poll for new or removed tables, which may result in updated task "
@@ -216,7 +227,9 @@ public class JdbcSourceConnectorConfig extends AbstractConfig {
         .define(BATCH_MAX_ROWS_CONFIG, Type.INT, BATCH_MAX_ROWS_DEFAULT, Importance.LOW, BATCH_MAX_ROWS_DOC, CONNECTOR_GROUP, 2, Width.SHORT, BATCH_MAX_ROWS_DISPLAY)
         .define(TABLE_POLL_INTERVAL_MS_CONFIG, Type.LONG, TABLE_POLL_INTERVAL_MS_DEFAULT, Importance.LOW, TABLE_POLL_INTERVAL_MS_DOC, CONNECTOR_GROUP, 3, Width.SHORT, TABLE_POLL_INTERVAL_MS_DISPLAY)
         .define(TOPIC_PREFIX_CONFIG, Type.STRING, Importance.HIGH, TOPIC_PREFIX_DOC, CONNECTOR_GROUP, 4, Width.MEDIUM, TOPIC_PREFIX_DISPLAY)
-        .define(TIMESTAMP_DELAY_INTERVAL_MS_CONFIG, Type.LONG, TIMESTAMP_DELAY_INTERVAL_MS_DEFAULT, Importance.HIGH, TIMESTAMP_DELAY_INTERVAL_MS_DOC, CONNECTOR_GROUP, 5, Width.MEDIUM, TIMESTAMP_DELAY_INTERVAL_MS_DISPLAY);
+        .define(TIMESTAMP_DELAY_INTERVAL_MS_CONFIG, Type.LONG, TIMESTAMP_DELAY_INTERVAL_MS_DEFAULT, Importance.HIGH, TIMESTAMP_DELAY_INTERVAL_MS_DOC, CONNECTOR_GROUP, 5, Width.MEDIUM, TIMESTAMP_DELAY_INTERVAL_MS_DISPLAY)
+        .define(PARTITION_KEY_COLUMN_NAME_CONFIG, Type.STRING, PARTITION_KEY_COLUMN_NAME_DEFAULT, Importance.LOW, PARTITION_KEY_COLUMN_NAME_DOC, MODE_GROUP, 3, Width.MEDIUM, PARTITION_KEY_COLUMN_NAME_DISPLAY, MODE_DEPENDENTS_RECOMMENDER)
+        .define(OFFSET_RESET_CONFIG, Type.STRING, OFFSET_RESET_DEFAULT, Importance.MEDIUM, OFFSET_RESET_DOC, MODE_GROUP, 3, Width.SHORT, OFFSET_RESET_DISPLAY, MODE_DEPENDENTS_RECOMMENDER);
   }
 
   public static final ConfigDef CONFIG_DEF = baseConfigDef();

@@ -120,6 +120,10 @@ public class JdbcSourceTask extends SourceTask {
         = config.getString(JdbcSourceTaskConfig.TIMESTAMP_COLUMN_NAME_CONFIG);
     Long timestampDelayInterval
         = config.getLong(JdbcSourceTaskConfig.TIMESTAMP_DELAY_INTERVAL_MS_CONFIG);
+    String partitionKeyColumn
+            = config.getString(JdbcSourceTaskConfig.PARTITION_KEY_COLUMN_NAME_CONFIG);
+    String offsetReset
+            = config.getString(JdbcSourceTaskConfig.OFFSET_RESET_CONFIG);
     boolean validateNonNulls
         = config.getBoolean(JdbcSourceTaskConfig.VALIDATE_NON_NULL_CONFIG);
 
@@ -151,15 +155,15 @@ public class JdbcSourceTask extends SourceTask {
       } else if (mode.equals(JdbcSourceTaskConfig.MODE_INCREMENTING)) {
         tableQueue.add(new TimestampIncrementingTableQuerier(
             queryMode, tableOrQuery, topicPrefix, null, incrementingColumn, offset,
-                timestampDelayInterval, schemaPattern, mapNumerics));
+                timestampDelayInterval, schemaPattern, mapNumerics, partitionKeyColumn, offsetReset));
       } else if (mode.equals(JdbcSourceTaskConfig.MODE_TIMESTAMP)) {
         tableQueue.add(new TimestampIncrementingTableQuerier(
             queryMode, tableOrQuery, topicPrefix, timestampColumn, null, offset,
-                timestampDelayInterval, schemaPattern, mapNumerics));
+                timestampDelayInterval, schemaPattern, mapNumerics, partitionKeyColumn, offsetReset));
       } else if (mode.endsWith(JdbcSourceTaskConfig.MODE_TIMESTAMP_INCREMENTING)) {
         tableQueue.add(new TimestampIncrementingTableQuerier(
             queryMode, tableOrQuery, topicPrefix, timestampColumn, incrementingColumn,
-                offset, timestampDelayInterval, schemaPattern, mapNumerics));
+                offset, timestampDelayInterval, schemaPattern, mapNumerics, partitionKeyColumn, offsetReset));
       }
     }
 
