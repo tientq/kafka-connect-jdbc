@@ -1,6 +1,5 @@
 package io.confluent.connect.jdbc.source;
 
-import io.confluent.connect.jdbc.util.StringUtils;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
@@ -44,6 +43,7 @@ public class CustomTimestampIncrementingTableQuerier extends TimestampIncrementi
         if (inputFields == null || "".equals(inputFields.trim()) || outputField == null || "".equals(outputField.trim())) {
             inputFields = null;
             outputField = null;
+            log.warn("Invalid input fields or output field in readable convert");
             return;
         }
         inputFields = inputFields.trim();
@@ -51,6 +51,9 @@ public class CustomTimestampIncrementingTableQuerier extends TimestampIncrementi
     }
 
     private void updateInputFieldNames() {
+        if (inputFields == null) {
+            return;
+        }
         String[] names = inputFields.split(",");
         for (String name : names) {
             if (name == null || "".equals(name.trim())) {
@@ -61,6 +64,7 @@ public class CustomTimestampIncrementingTableQuerier extends TimestampIncrementi
         if (inputFiledNames.isEmpty()) {
             inputFields = null;
             outputField = null;
+            log.warn("Invalid input fields or output field in readable convert");
         }
     }
 

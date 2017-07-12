@@ -10,6 +10,11 @@ Documentation for this connector can be found [here](http://docs.confluent.io/cu
 To build a development version you'll need a recent version of Kafka. You can build
 kafka-connect-jdbc with Maven using the standard lifecycle phases.
 
+# DMS build
+
+```sh
+mvn clean package -DskipTests -Dcheckstyle.skip=true
+```
 
 # Contribute
 
