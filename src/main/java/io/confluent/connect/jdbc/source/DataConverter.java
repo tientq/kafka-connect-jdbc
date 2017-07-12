@@ -73,7 +73,7 @@ public class DataConverter {
   }
 
 
-  private static void addFieldSchema(ResultSetMetaData metadata, int col,
+  public static void addFieldSchema(ResultSetMetaData metadata, int col,
                                      SchemaBuilder builder, boolean mapNumerics)
       throws SQLException {
     // Label is what the query requested the column name be using an "AS" clause, name is the
@@ -312,7 +312,7 @@ public class DataConverter {
     }
   }
 
-  private static void convertFieldValue(ResultSet resultSet, int col, int colType,
+  public static void convertFieldValue(ResultSet resultSet, int col, int colType,
                                         Struct struct, String fieldName, boolean mapNumerics)
       throws SQLException, IOException {
     final Object colValue;

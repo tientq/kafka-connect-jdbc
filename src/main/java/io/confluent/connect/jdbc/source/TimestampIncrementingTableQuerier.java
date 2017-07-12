@@ -57,10 +57,10 @@ public class TimestampIncrementingTableQuerier extends TableQuerier {
 
   private static final BigDecimal LONG_MAX_VALUE_AS_BIGDEC = new BigDecimal(Long.MAX_VALUE);
 
-  private String timestampColumn;
-  private String incrementingColumn;
-  private long timestampDelay;
-  private TimestampIncrementingOffset offset;
+  protected String timestampColumn;
+  protected String incrementingColumn;
+  protected long timestampDelay;
+  protected TimestampIncrementingOffset offset;
 
   public TimestampIncrementingTableQuerier(QueryMode mode, String name, String topicPrefix,
                                            String timestampColumn, String incrementingColumn,
