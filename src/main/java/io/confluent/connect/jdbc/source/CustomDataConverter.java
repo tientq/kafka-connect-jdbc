@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class CustomDataConverter {
@@ -27,6 +28,7 @@ public class CustomDataConverter {
         if (outputField != null) {
             Schema nested = SchemaBuilder.array(Schema.INT64_SCHEMA).optional().build();
             builder.field(outputField, nested);
+            log.debug("Built success nested schema");
         }
         return builder.build();
     }
@@ -52,7 +54,7 @@ public class CustomDataConverter {
     }
 
     private static void convertNestedField(Struct struct, List<String> inputFieldNames, String outputField) {
-        ArrayList<Long> longList = new ArrayList<>();
+        HashSet<Long> longSet = new HashSet<>();
         if (inputFieldNames == null || inputFieldNames.isEmpty()) {
             return;
         }
@@ -72,11 +74,12 @@ public class CustomDataConverter {
         for (String longString : longStrings) {
             try {
                 long longValue = Long.parseLong(longString);
-                longList.add(longValue);
+                longSet.add(longValue);
             } catch (NumberFormatException e) {
                 log.warn("Ignoring record because convert nested input field to long fail:", e);
             }
         }
+        ArrayList longList = new ArrayList(longSet);
         struct.put(outputField, longList);
     }
 }
