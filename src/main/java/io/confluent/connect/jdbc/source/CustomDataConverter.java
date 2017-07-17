@@ -11,29 +11,29 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class CustomDataConverter {
     private static final Logger log = LoggerFactory.getLogger(JdbcSourceTask.class);
 
-    public static Schema convertSchema(String tableName, ResultSetMetaData metadata, boolean mapNumerics, String outputField)
+    public static Schema convertSchema(String tableName, ResultSetMetaData metadata, boolean mapNumerics, Set<String> outputFields)
             throws SQLException {
         // TODO: Detect changes to metadata, which will require schema updates
         SchemaBuilder builder = SchemaBuilder.struct().name(tableName);
         for (int col = 1; col <= metadata.getColumnCount(); col++) {
             DataConverter.addFieldSchema(metadata, col, builder, mapNumerics);
         }
-        if (outputField != null) {
-            Schema nested = SchemaBuilder.array(Schema.INT64_SCHEMA).optional().build();
-            builder.field(outputField, nested);
+        if (outputFields != null && !outputFields.isEmpty()) {
+            for (String outputField : outputFields) {
+                Schema nested = SchemaBuilder.array(Schema.INT64_SCHEMA).optional().build();
+                builder.field(outputField, nested);
+            }
             log.debug("Built success nested schema");
         }
         return builder.build();
     }
 
-    public static Struct convertRecord(Schema schema, ResultSet resultSet, boolean mapNumerics, List<String> inputFieldNames, String outputField)
+    public static Struct convertRecord(Schema schema, ResultSet resultSet, boolean mapNumerics, Map<String, String[]> convertFields)
             throws SQLException {
         ResultSetMetaData metadata = resultSet.getMetaData();
         Struct struct = new Struct(schema);
@@ -47,15 +47,17 @@ public class CustomDataConverter {
                 log.warn("Ignoring record due to SQL error:", e);
             }
         }
-        if (outputField != null) {
-            convertNestedField(struct, inputFieldNames, outputField);
+        if (convertFields != null && !convertFields.isEmpty()) {
+            for (Map.Entry<String, String[]> entry : convertFields.entrySet()) {
+                convertNestedField(struct, entry.getValue(), entry.getKey());
+            }
         }
         return struct;
     }
 
-    private static void convertNestedField(Struct struct, List<String> inputFieldNames, String outputField) {
+    private static void convertNestedField(Struct struct, String[] inputFieldNames, String outputField) {
         HashSet<Long> longSet = new HashSet<>();
-        if (inputFieldNames == null || inputFieldNames.isEmpty()) {
+        if (inputFieldNames == null || inputFieldNames.length == 0) {
             return;
         }
         List<String> values = new ArrayList<>();

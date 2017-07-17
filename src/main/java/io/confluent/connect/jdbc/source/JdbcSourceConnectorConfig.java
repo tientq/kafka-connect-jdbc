@@ -172,13 +172,9 @@ public class JdbcSourceConnectorConfig extends AbstractConfig {
   public static final String PARTITION_KEY_COLUMN_NAME_DEFAULT = "";
   private static final String PARTITION_KEY_COLUMN_NAME_DISPLAY = "Partition Key Column Name";
 
-  public static final String INPUT_FIELDS_CONF = "readableUserIds.input.fields";
-  static final String INPUT_FIELDS_DOC = "A list of fields will be combine to a list of integer";
-  static final String INPUT_FIELDS_DEFAULT = "";
-
-  public static final String OUTPUT_FIELD_CONF = "readableUserIds.output.field";
-  static final String OUTPUT_FIELD_DOC = "Name of output field will be create";
-  static final String OUTPUT_FIELD_DEFAULT = "readable_user_ids";
+  public static final String CONVERT_FIELDS_CONF = "convert.patterns";
+  static final String CONVERT_FIELDS_DOC = "A pattern define fields will be combine to a list of integer. Ex: es_work_sub_tasks(es_assign_ids=assign_ids,es_readable_user_ids=assign_ids+created_by_id),es_tasks(test1=test2)";
+  static final String CONVERT_FIELDS_DEFAULT = "";
 
   public static final String DATABASE_GROUP = "Database";
   public static final String MODE_GROUP = "Mode";
@@ -232,8 +228,7 @@ public class JdbcSourceConnectorConfig extends AbstractConfig {
         .define(TOPIC_PREFIX_CONFIG, Type.STRING, Importance.HIGH, TOPIC_PREFIX_DOC, CONNECTOR_GROUP, 4, Width.MEDIUM, TOPIC_PREFIX_DISPLAY)
         .define(TIMESTAMP_DELAY_INTERVAL_MS_CONFIG, Type.LONG, TIMESTAMP_DELAY_INTERVAL_MS_DEFAULT, Importance.HIGH, TIMESTAMP_DELAY_INTERVAL_MS_DOC, CONNECTOR_GROUP, 5, Width.MEDIUM, TIMESTAMP_DELAY_INTERVAL_MS_DISPLAY)
         .define(PARTITION_KEY_COLUMN_NAME_CONFIG, Type.STRING, PARTITION_KEY_COLUMN_NAME_DEFAULT, Importance.LOW, PARTITION_KEY_COLUMN_NAME_DOC, MODE_GROUP, 3, Width.MEDIUM, PARTITION_KEY_COLUMN_NAME_DISPLAY, MODE_DEPENDENTS_RECOMMENDER)
-        .define(INPUT_FIELDS_CONF, ConfigDef.Type.STRING, INPUT_FIELDS_DEFAULT, ConfigDef.Importance.HIGH, INPUT_FIELDS_DOC)
-        .define(OUTPUT_FIELD_CONF, ConfigDef.Type.STRING, OUTPUT_FIELD_DEFAULT, ConfigDef.Importance.MEDIUM, OUTPUT_FIELD_DOC);
+        .define(CONVERT_FIELDS_CONF, ConfigDef.Type.STRING, CONVERT_FIELDS_DEFAULT, ConfigDef.Importance.HIGH, CONVERT_FIELDS_DOC);
   }
 
   public static final ConfigDef CONFIG_DEF = baseConfigDef();

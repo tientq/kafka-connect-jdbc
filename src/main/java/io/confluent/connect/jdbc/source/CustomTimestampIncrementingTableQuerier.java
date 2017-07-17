@@ -9,17 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CustomTimestampIncrementingTableQuerier extends TimestampIncrementingTableQuerier {
     private static final Logger log = LoggerFactory.getLogger(JdbcSourceTask.class);
     private final String partitionKeyColumn;
-    private String inputFields;
-    private String outputField;
-    private List<String> inputFiledNames = new ArrayList<>();
+    private final String convertPatterns;
+    private Map<String, String[]> convertFields = new HashMap<>();
 
     public CustomTimestampIncrementingTableQuerier(JdbcSourceTaskConfig config, QueryMode queryMode, String tableOrQuery, String timestampColumn, String incrementingColumn, Map<String, Object> offset) {
         super(queryMode,
@@ -33,44 +31,31 @@ public class CustomTimestampIncrementingTableQuerier extends TimestampIncrementi
                 config.getBoolean(JdbcSourceTaskConfig.NUMERIC_PRECISION_MAPPING_CONFIG)
         );
         partitionKeyColumn = config.getString(JdbcSourceTaskConfig.PARTITION_KEY_COLUMN_NAME_CONFIG);
-        inputFields = config.getString(JdbcSourceTaskConfig.INPUT_FIELDS_CONF);
-        outputField = config.getString(JdbcSourceTaskConfig.OUTPUT_FIELD_CONF);
-        removeOutputFieldIfInputInvalid();
-        updateInputFieldNames();
+        convertPatterns = config.getString(JdbcSourceTaskConfig.CONVERT_FIELDS_CONF);
+        buildConvertFields(convertPatterns, tableOrQuery);
     }
 
-    private void removeOutputFieldIfInputInvalid() {
-        if (inputFields == null || "".equals(inputFields.trim()) || outputField == null || "".equals(outputField.trim())) {
-            inputFields = null;
-            outputField = null;
-            log.warn("Invalid input fields or output field in readable convert");
+    private void buildConvertFields(String convertPatterns, String tableOrQuery) {
+        if (convertPatterns == null || "".equals(convertPatterns)) {
             return;
         }
-        inputFields = inputFields.trim();
-        outputField = outputField.trim();
-    }
-
-    private void updateInputFieldNames() {
-        if (inputFields == null) {
-            return;
-        }
-        String[] names = inputFields.split(",");
-        for (String name : names) {
-            if (name == null || "".equals(name.trim())) {
-                continue;
+        Pattern tablePattern = Pattern.compile(tableOrQuery + "\\(([a-zA-Z0-9_=+,]+)\\)");
+        Pattern fieldPattern = Pattern.compile("([a-zA-Z0-9_]+)=([a-zA-Z0-9_+]+)");
+        Matcher tableMatcher = tablePattern.matcher(convertPatterns);
+        if (tableMatcher.find()) {
+            Matcher fieldMatcher = fieldPattern.matcher(tableMatcher.group(1));
+            while (fieldMatcher.find()) {
+                String output = fieldMatcher.group(1);
+                String input = fieldMatcher.group(2);
+                String[] inputFields = input.split("\\+");
+                convertFields.put(output, inputFields);
             }
-            inputFiledNames.add(name.trim());
-        }
-        if (inputFiledNames.isEmpty()) {
-            inputFields = null;
-            outputField = null;
-            log.warn("Invalid input fields or output field in readable convert");
         }
     }
 
     @Override
     public SourceRecord extractRecord() throws SQLException {
-        final Struct record = CustomDataConverter.convertRecord(schema, resultSet, mapNumerics, inputFiledNames, outputField);
+        final Struct record = CustomDataConverter.convertRecord(schema, resultSet, mapNumerics, convertFields);
         offset = extractOffset(schema, record);
         // TODO: Key?
         final String topic;
@@ -99,7 +84,7 @@ public class CustomTimestampIncrementingTableQuerier extends TimestampIncrementi
     public void maybeStartQuery(Connection db) throws SQLException {
         super.maybeStartQuery(db);
         if (resultSet != null) {
-            schema = CustomDataConverter.convertSchema(name, resultSet.getMetaData(), mapNumerics, outputField);
+            schema = CustomDataConverter.convertSchema(name, resultSet.getMetaData(), mapNumerics, convertFields.keySet());
         }
     }
 }
